@@ -11,17 +11,23 @@ class Api::V1::ItemsController < ApplicationController
     render json: ItemSerializer.new(item)
   end
 
-  def create 
+  def create
     item = Item.create!(item_params)
     render json: ItemSerializer.new(item), status: 201
   end
-  
+
   def update
     item = Item.find(params[:id])
     item.update!(item_params)
     render json: ItemSerializer.new(item)
   rescue ActiveRecord::RecordInvalid => e
     validation_error_response(e)
+  end
+
+  def destroy
+    item = Item.find(params[:id])
+    destroy_invoice_if_needed(item)
+    item.destroy!
   end
 
   private
@@ -39,4 +45,11 @@ class Api::V1::ItemsController < ApplicationController
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
   end
 
+  def destroy_invoice_if_needed(item)# should only happen if item is last on invoice
+    item.invoices.each do |invoice|
+      if invoice.items.count == 1
+        invoice.destroy
+      end
+    end
+  end
 end
