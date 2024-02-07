@@ -20,8 +20,6 @@ class Api::V1::ItemsController < ApplicationController
     item = Item.find(params[:id])
     item.update!(item_params)
     render json: ItemSerializer.new(item)
-  rescue ActiveRecord::RecordInvalid => e
-    validation_error_response(e)
   end
 
   def destroy
