@@ -10,6 +10,9 @@ describe "merchants API" do
 
     merchants = JSON.parse(response.body, symbolize_names: true)
 
+    expect(merchants[:data].length).to eq(1)
+    expect(merchants[:data].count).to eq(1)
+
     merchants[:data].each do |merchant|
       expect(merchant).to have_key(:id)
       expect(merchant[:id]).to be_an(String)
