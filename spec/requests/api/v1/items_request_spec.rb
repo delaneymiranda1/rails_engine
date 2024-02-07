@@ -229,8 +229,13 @@ describe "items API", type: :request do
     it "sad: returns 404 if merchant not found" do
       get "/api/v1/merchants/7/items"
 
+      expect(response).to have_http_status(:not_found)
       expect(response).not_to be_successful
-      expect(response.status).to eq(404)
+
+      response_body = JSON.parse(response.body, symbolize_names: true)
+
+      expect(response_body[:errors].first[:status]).to eq("404")
+      expect(response_body[:errors].first[:title]).to eq("Couldn't find Merchant with 'id'=7")
     end
   end
 end
