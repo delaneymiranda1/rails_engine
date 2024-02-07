@@ -11,6 +11,10 @@ class Api::V1::ItemsController < ApplicationController
     render json: ItemSerializer.new(item)
   end
 
+  def create 
+    item = Item.create!(item_params)
+    render json: ItemSerializer.new(item), status: 201
+  end
 
   private 
   
@@ -21,6 +25,10 @@ class Api::V1::ItemsController < ApplicationController
   def validation_error_response(exception) 
     render json: ErrorSerializer.new(ErrorMessage.new(exception.message, 400))
     .serialize_json, status: :bad_request
+  end
+
+  def item_params
+    params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
   end
 
 end
