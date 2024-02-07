@@ -69,4 +69,42 @@ describe "items API" do
     expect(data[:errors].first[:status]).to eq("404")
     expect(data[:errors].first[:title]).to eq("Couldn't find Item with 'id'=1")
   end
+
+  it 'creates an item' do
+    merchant = create(:merchant)
+    item = ({
+      name: 'Butter',
+      description: 'Lite',
+      unit_price: 3.99,
+      merchant_id: merchant.id
+    })
+
+    headers = {"CONTENT_TYPE" => "application/json"}
+    
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item)
+    expect(response).to be_successful
+    new_item = Item.last 
+
+    expect(new_item.name).to eq(item[:name])
+    expect(new_item.description).to eq(item[:description])
+    expect(new_item.unit_price).to eq(item[:unit_price])
+  end
+
+  it 'gets an error if one of the attributes is not filled in' do
+    merchant = create(:merchant)
+    item = ({
+      name: '',
+      description: 'Lite',
+      unit_price: 3.99,
+      merchant_id: merchant.id
+    })
+    headers = {"CONTENT_TYPE" => "application/json"}
+    
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item)
+    expect(response).to_not be_successful
+    data = JSON.parse(response.body, symbolize_names: true)
+    expect(data[:errors]).to be_a(Array)
+    expect(data[:errors].first[:status]).to eq("400")
+    expect(data[:errors].first[:title]).to eq("Validation failed: Name can't be blank")
+  end
 end
