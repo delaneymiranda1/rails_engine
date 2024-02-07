@@ -11,6 +11,9 @@ describe "items API" do
 
     items = JSON.parse(response.body, symbolize_names: true)
 
+    expect(items[:data].length).to eq(7)
+    expect(items[:data].count).to eq(7)
+
     items[:data].each do |item|
       expect(item).to have_key(:id)
       expect(item[:id]).to be_an(String)
