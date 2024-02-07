@@ -3,7 +3,13 @@ class Api::V1::ItemsController < ApplicationController
   rescue_from ActiveRecord::RecordInvalid, with: :validation_error_response
 
   def index
-    render json: ItemSerializer.new(Item.all)
+    if params[:merchant_id].present?
+      merchant = Merchant.find(params[:merchant_id])
+      items = merchant.items
+    else
+      items = Item.all
+    end
+    render json: ItemSerializer.new(items)
   end
 
   def show
