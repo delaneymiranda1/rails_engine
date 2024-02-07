@@ -11,6 +11,11 @@ class Api::V1::ItemsController < ApplicationController
     render json: ItemSerializer.new(item)
   end
 
+  def create 
+    item = Item.create!(item_params)
+    render json: ItemSerializer.new(item), status: 201
+  end
+  
   def update
     item = Item.find(params[:id])
     item.update!(item_params)
@@ -33,4 +38,5 @@ class Api::V1::ItemsController < ApplicationController
   def item_params
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
   end
+
 end
