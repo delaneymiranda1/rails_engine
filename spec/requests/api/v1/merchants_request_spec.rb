@@ -1,6 +1,6 @@
 require "rails_helper"
 
-describe "merchants API" do
+describe "merchants API", type: :request do
   it "fetches all merchants" do
     merchant = create(:merchant)
 
