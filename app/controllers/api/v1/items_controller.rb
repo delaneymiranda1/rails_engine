@@ -3,7 +3,12 @@ class Api::V1::ItemsController < ApplicationController
   rescue_from ActiveRecord::RecordInvalid, with: :validation_error_response
 
   def index
-    render json: ItemSerializer.new(Item.all)
+    if params[:merchant_id].present?
+      check_for_merchant
+    else
+      items = Item.all
+      render json: ItemSerializer.new(items)
+    end
   end
 
   def show
@@ -48,6 +53,16 @@ class Api::V1::ItemsController < ApplicationController
       if invoice.items.count == 1
         invoice.destroy
       end
+    end
+  end
+
+  def check_for_merchant
+    merchant = Merchant.find(params[:merchant_id])
+    if merchant
+      items = merchant.items
+      render json: ItemSerializer.new(items)
+    else
+      render json: { error: 'Merchant not found' }, status: :not_found
     end
   end
 end
