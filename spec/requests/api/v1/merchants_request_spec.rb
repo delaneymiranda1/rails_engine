@@ -1,6 +1,6 @@
 require "rails_helper"
 
-describe "merchants API" do
+describe "merchants API", type: :request do
   it "fetches all merchants" do
     merchant = create(:merchant)
 
@@ -9,6 +9,9 @@ describe "merchants API" do
     expect(response).to be_successful
 
     merchants = JSON.parse(response.body, symbolize_names: true)
+
+    expect(merchants[:data].length).to eq(1)
+    expect(merchants[:data].count).to eq(1)
 
     merchants[:data].each do |merchant|
       expect(merchant).to have_key(:id)
