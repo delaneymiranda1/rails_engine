@@ -10,7 +10,6 @@ describe "merchant items API", type: :request do
     expect(response).to be_successful
 
     items_merchant = JSON.parse(response.body, symbolize_names: true)
-    require 'pry'; binding.pry
 
     expect(items_merchant[:data]). have_key(:item_id)
     expect(items_merchant[:data][:item_id]).to be_an(String)

@@ -1,4 +1,4 @@
-class Api::V1::Items::MerchantsController < ApplicationController
+class Api::V1::MerchantItemsController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
 
   def index 
