@@ -238,4 +238,19 @@ describe "items API", type: :request do
       expect(response_body[:errors].first[:title]).to eq("Couldn't find Merchant with 'id'=7")
     end
   end
+
+  describe "GET /api/v1/items/:id/merchant" do
+    it "happy: fetches the merchant of the item" do
+      merchant = create(:merchant)
+      item = create(:item, merchant: merchant)
+
+      get "/api/v1/items/#{item.id}/merchant"
+
+      expect(response).to be_successful
+    end
+
+    it "sad: throws 404 error if item not found" do
+
+    end
+  end
 end
