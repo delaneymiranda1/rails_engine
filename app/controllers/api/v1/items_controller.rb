@@ -3,7 +3,12 @@ class Api::V1::ItemsController < ApplicationController
   rescue_from ActiveRecord::RecordInvalid, with: :validation_error_response
 
   def index
-    render json: ItemSerializer.new(Item.all)
+    if params[:merchant_id].present?
+      check_for_merchant
+    else
+      items = Item.all
+      render json: ItemSerializer.new(items)
+    end
   end
 
   def show
@@ -11,12 +16,21 @@ class Api::V1::ItemsController < ApplicationController
     render json: ItemSerializer.new(item)
   end
 
+  def create
+    item = Item.create!(item_params)
+    render json: ItemSerializer.new(item), status: 201
+  end
+
   def update
     item = Item.find(params[:id])
     item.update!(item_params)
     render json: ItemSerializer.new(item)
-  rescue ActiveRecord::RecordInvalid => e
-    validation_error_response(e)
+  end
+
+  def destroy
+    item = Item.find(params[:id])
+    destroy_invoice_if_needed(item)
+    item.destroy!
   end
 
   private
@@ -32,5 +46,23 @@ class Api::V1::ItemsController < ApplicationController
 
   def item_params
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
+  end
+
+  def destroy_invoice_if_needed(item)# should only happen if item is last on invoice
+    item.invoices.each do |invoice|
+      if invoice.items.count == 1
+        invoice.destroy
+      end
+    end
+  end
+
+  def check_for_merchant
+    merchant = Merchant.find(params[:merchant_id])
+    if merchant
+      items = merchant.items
+      render json: ItemSerializer.new(items)
+    else
+      render json: { error: 'Merchant not found' }, status: :not_found
+    end
   end
 end

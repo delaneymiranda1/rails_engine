@@ -14,7 +14,9 @@ Rails.application.routes.draw do
           get 'find', to: 'merchants#find'
         end
       end
-      resources :items, only: [:index, :show, :update]
+        resources :items, only: [:index]
+      end
+      resources :items
     end
   end
 end
