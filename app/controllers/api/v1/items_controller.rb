@@ -4,13 +4,7 @@ class Api::V1::ItemsController < ApplicationController
 
   def index
     if params[:merchant_id].present?
-      merchant = Merchant.find(params[:merchant_id])
-      if merchant
-        items = merchant.items
-        render json: ItemSerializer.new(items)
-      else
-        render json: { error: 'Merchant not found' }, status: :not_found
-      end
+      check_for_merchant
     else
       items = Item.all
       render json: ItemSerializer.new(items)
@@ -59,6 +53,16 @@ class Api::V1::ItemsController < ApplicationController
       if invoice.items.count == 1
         invoice.destroy
       end
+    end
+  end
+
+  def check_for_merchant
+    merchant = Merchant.find(params[:merchant_id])
+    if merchant
+      items = merchant.items
+      render json: ItemSerializer.new(items)
+    else
+      render json: { error: 'Merchant not found' }, status: :not_found
     end
   end
 end
