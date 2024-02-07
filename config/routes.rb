@@ -9,7 +9,11 @@ Rails.application.routes.draw do
   # root "posts#index"
   namespace :api do
     namespace :v1 do
-      resources :merchants, only: [:index, :show]
+      resources :merchants, only: [:index, :show] do
+        collection do
+          get 'find', to: 'merchants#find'
+        end
+      end
       resources :items, only: [:index, :show, :update]
     end
   end

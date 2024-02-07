@@ -51,4 +51,19 @@ describe "merchants API", type: :request do
     expect(data[:errors].first[:status]).to eq("404")
     expect(data[:errors].first[:title]).to eq("Couldn't find Merchant with 'id'=1")
   end
+
+  it 'finds a merchant' do
+    merchant = create(:merchant)
+
+    get "/api/v1/merchants/find?name=Mart"
+
+    expect(response).to be_successful
+    merchant_by_name = JSON.parse(response.body, symbolize_names: true)
+
+    expect(merchant_by_name).to have_key(:id)
+    expect(merchant_by_name[:id]).to be_an(String)
+
+    expect(merchant_by_name[:attributes]).to have_key(:name)
+    expect(merchant_by_name[:attributes][:name]).to be_a(String)
+  end
 end
