@@ -1,5 +1,5 @@
 class Api::V1::MerchantsController < ApplicationController
-  rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
+
   def find
     if params[:name].blank?
       render json: { data: { status: 422, title: "Parameter 'name' cannot be empty" } }, status: :unprocessable_entity
@@ -21,11 +21,5 @@ class Api::V1::MerchantsController < ApplicationController
   def show
     merchant = Merchant.find(params[:id])
     render json: MerchantSerializer.new(merchant)
-  end
-
-  private
-
-  def not_found_response(exception)
-    render json: ErrorSerializer.new(ErrorMessage.new(exception.message, 404)).serialize_json, status: :not_found
   end
 end
