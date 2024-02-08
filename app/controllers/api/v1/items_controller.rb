@@ -43,20 +43,24 @@ class Api::V1::ItemsController < ApplicationController
       @items = Item.where('name ILIKE ?', "%#{params[:name]}%")
       check_for_items
     elsif params[:min_price] && (!params[:max_price] && !params[:name])
-      @items = Item.where('unit_price >=?', params[:min_price])
-      check_for_items
+      if params[:min_price].to_i > 0
+        @items = Item.where('unit_price >=?', params[:min_price])
+        check_for_items
+      else
+        render json: { errors: 'price cannot be negative' }, status: :bad_request
+      end
     elsif params[:max_price] && (!params[:min_price] && !params[:name])
-      @items = Item.where('unit_price <=?', params[:max_price])
-      check_for_items
+      if params[:max_price].to_i > 0
+        @items = Item.where('unit_price <=?', params[:max_price])
+        check_for_items
+      else
+        render json: { errors: 'price cannot be negative' }, status: :bad_request
+      end
     elsif params[:min_price] && (params[:max_price] && !params[:name])
       @items = Item.where('unit_price >=? AND unit_price <=?', params[:min_price], params[:max_price])
       check_for_items
-    elsif !params[:name].present? && (!params[:min_price].present? && !params[:max_price].present?)
-      render json: { error: 'parameter cannot be empty or missing' }, status: :bad_request
-    elsif params[:name].present? && (params[:min_price].present? && params[:max_price].present?)#must come before next condition
-      render json: { error: 'cannot send name, minimum price and maximum price' }, status: :bad_request
-    elsif params[:name].present? && (params[:min_price].present? || params[:max_price].present?)
-      render json: { error: 'cannot send both name and minimum price or maximum price' }, status: :bad_request
+    else
+      find_all_sad_paths
     end
   end
 
@@ -110,6 +114,16 @@ class Api::V1::ItemsController < ApplicationController
     else
       @items = []
       render json: ItemSerializer.new(@items)
+    end
+  end
+
+  def find_all_sad_paths
+    if !params[:name].present? && (!params[:min_price].present? && !params[:max_price].present?)
+      render json: { error: 'parameter cannot be empty or missing' }, status: :bad_request
+    elsif params[:name].present? && (params[:min_price].present? && params[:max_price].present?)#must come before next condition
+      render json: { error: 'cannot send name, minimum price and maximum price' }, status: :bad_request
+    elsif params[:name].present? && (params[:min_price].present? || params[:max_price].present?)
+      render json: { error: 'cannot send both name and minimum price or maximum price' }, status: :bad_request
     end
   end
 end
