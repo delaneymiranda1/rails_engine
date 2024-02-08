@@ -347,5 +347,25 @@ describe "items API", type: :request do
 
       expect(response).to be_successful
     end
+
+    it "sad: must have parameter" do
+      get "/api/v1/items/find_all"
+    end
+
+    it "sad: param must not be empty" do
+      get "/api/v1/items/find_all?name="
+    end
+
+    it "sad: cannot send both name and min_price" do
+      get "/api/v1/items/find_all?name=Ring&min_price=99"
+    end
+
+    it "sad: cannot send both name and max_price" do
+      get "/api/v1/items/find_all?name=Ring&max_price=300"
+    end
+
+    it "sad: cannot send both name and min_price and max_price" do
+      get "/api/v1/items/find_all?name=Ring&min_price=99&max_price=300"
+    end
   end
 end
