@@ -203,7 +203,7 @@ describe "items API", type: :request do
       item3 = create(:item, merchant: merchant)
 
       get "/api/v1/merchants/#{merchant.id}/items"
-      
+
       expect(response).to be_successful
 
       items = JSON.parse(response.body, symbolize_names: true)
@@ -399,31 +399,43 @@ describe "items API", type: :request do
       get "/api/v1/items/find_all"
 
       expect(response).to have_http_status(:bad_request)
-      expect(response.body).to include('search parameter is required')
+      expect(response.body).to include('parameter cannot be empty or missing')
     end
 
     it "sad: param must not be empty" do
       get "/api/v1/items/find_all?name="
 
       expect(response).to have_http_status(:bad_request)
-      expect(response.body).to include('parameter must not be empty')
+      expect(response.body).to include('parameter cannot be empty or missing')
     end
 
     it "sad: cannot send both name and min_price" do
+      item1 = create(:item, merchant: @merchant, name: "Ring")
+      item2 = create(:item, merchant: @merchant, name: "Turing Coffee Mug")
+      item3 = create(:item, merchant: @merchant, name: "Lord of The Rings Kite")
+
       get "/api/v1/items/find_all?name=Ring&min_price=99"
 
       expect(response).to have_http_status(:bad_request)
-      expect(response.body).to include('cannot send both name and minimum price')
+      expect(response.body).to include('cannot send both name and minimum price or maximum price')
     end
 
     it "sad: cannot send both name and max_price" do
+      item1 = create(:item, merchant: @merchant, name: "Ring")
+      item2 = create(:item, merchant: @merchant, name: "Turing Coffee Mug")
+      item3 = create(:item, merchant: @merchant, name: "Lord of The Rings Kite")
+
       get "/api/v1/items/find_all?name=Ring&max_price=300"
 
       expect(response).to have_http_status(:bad_request)
-      expect(response.body).to include('cannot send both name and maximum price')
+      expect(response.body).to include('cannot send both name and minimum price or maximum price')
     end
 
     it "sad: cannot send both name and min_price and max_price" do
+      item1 = create(:item, merchant: @merchant, name: "Ring")
+      item2 = create(:item, merchant: @merchant, name: "Turing Coffee Mug")
+      item3 = create(:item, merchant: @merchant, name: "Lord of The Rings Kite")
+
       get "/api/v1/items/find_all?name=Ring&min_price=99&max_price=300"
 
       expect(response).to have_http_status(:bad_request)
