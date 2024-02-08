@@ -316,6 +316,10 @@ describe "items API", type: :request do
       get "/api/v1/items/find_all?min_price=99"
 
       expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].count).to eq(2)
     end
 
     it "happy: fetches all items with the given max price" do
@@ -326,6 +330,10 @@ describe "items API", type: :request do
       get "/api/v1/items/find_all?max_price=199"
 
       expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].count).to eq(2)
     end
 
     it "happy: fetches all items between the given min and max price" do
@@ -336,6 +344,10 @@ describe "items API", type: :request do
       get "/api/v1/items/find_all?max_price=199&min_price=99"
 
       expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].count).to eq(1)
     end
 
     it "sad: returns an empty array if no items match query" do
