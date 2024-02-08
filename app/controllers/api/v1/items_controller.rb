@@ -39,8 +39,28 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def find_all
-    @items = Item.all
-    search_params
+    if params[:name]
+      items = Item.where('name ILIKE ?', "%#{params[:name]}%")
+      if items.empty?
+        items = []
+      end
+    elsif params[:min_price] && !params[:max_price].present?
+      items = Item.where('unit_price >=?', params[:min_price])
+      if items.empty?
+        items = []
+      end
+    elsif params[:max_price] && !params[:min_price].present?
+      items = Item.where('unit_price <=?', params[:max_price])
+      if items.empty?
+        items = []
+      end
+    elsif params[:min_price] && params[:max_price]
+      items = Item.where('unit_price >=? AND unit_price <=?', params[:min_price], params[:max_price])
+      if items.empty?
+        items = []
+      end
+    end
+    render json: ItemSerializer.new(items)
   end
 
   private
@@ -85,18 +105,5 @@ class Api::V1::ItemsController < ApplicationController
     end
   rescue
     render json: { error: "Item not found" }, status: :not_found
-  end
-
-  def search_params
-    if params[:name]
-      @items = Item.where('name ILIKE ?', "%#{params[:name]}%")
-    elsif params[:min_price] && !params[:max_price].present?
-      @items = Item.where('unit_price >=?', params[:min_price])
-    elsif params[:max_price] && !params[:min_price].present?
-      @items = Item.where('unit_price <=?', params[:max_price])
-    elsif params[:min_price] && params[:max_price]
-      @items = Item.where('unit_price >=? AND unit_price <=?', params[:min_price], params[:max_price])
-    end
-    render json: ItemSerializer.new(@items)
   end
 end
