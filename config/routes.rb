@@ -11,6 +11,10 @@ Rails.application.routes.draw do
     namespace :v1 do
       get "items/find_all", to: "items#find_all"
       resources :merchants, only: [:index, :show] do
+        collection do
+          get 'find', to: 'merchants#find'
+        end
+      
         resources :items, only: [:index]
       end
       resources :items do
