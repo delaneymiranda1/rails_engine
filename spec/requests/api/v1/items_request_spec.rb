@@ -264,4 +264,64 @@ describe "items API", type: :request do
       expect(response.status).to eq(404)
     end
   end
+
+  describe "GET /api/v1/items/find_all?name=Ring" do
+    before :each do
+      @merchant = create(:merchant)
+    end
+
+    it "happy: fetches all items with the given name" do
+      item1 = create(:item, merchant: @merchant, name: "Ring")#
+      item2 = create(:item, merchant: @merchant, name: "Turing Coffee Mug")#
+      item3 = create(:item, merchant: @merchant, name: "Lord of The Rings Kite")#
+      item4 = create(:item, merchant: @merchant, name: "Pickled Herring")#
+      item5 = create(:item, merchant: @merchant, name: "Spring Mattress")#
+      item5 = create(:item, merchant: @merchant, name: "Fake Turtle Eggs")
+      item5 = create(:item, merchant: @merchant, name: "Electric Trampoline Sweeper")
+
+      get "/api/v1/items/find_all?name=Ring"
+
+      expect(response).to be_successful
+    end
+
+    it "happy: fetches all items with the given min price" do
+      item1 = create(:item, merchant: @merchant, unit_price: 100)#
+      item2 = create(:item, merchant: @merchant, unit_price: 200)#
+      item3 = create(:item, merchant: @merchant, unit_price: 50)
+
+      get "/api/v1/items/find_all?min_price=99"
+
+      expect(response).to be_successful
+    end
+
+    it "happy: fetches all items with the given max price" do
+      item1 = create(:item, merchant: @merchant, unit_price: 100)#
+      item2 = create(:item, merchant: @merchant, unit_price: 200)
+      item3 = create(:item, merchant: @merchant, unit_price: 50)#
+
+      get "/api/v1/items/find_all?max_price=199"
+
+      expect(response).to be_successful
+    end
+
+    it "happy: fetches all items between the given min and max price" do
+      item1 = create(:item, merchant: @merchant, unit_price: 100)#
+      item2 = create(:item, merchant: @merchant, unit_price: 200)
+      item3 = create(:item, merchant: @merchant, unit_price: 50)
+
+      get "/api/v1/items/find_all?max_price=199&min_price=99"
+
+      expect(response).to be_successful
+    end
+
+    it "sad: returns an empty array if no items match query" do
+      item1 = create(:item, merchant: @merchant, name: "Ring")
+      item2 = create(:item, merchant: @merchant, name: "Turing Coffee Mug")
+      item3 = create(:item, merchant: @merchant, name: "Lord of The Rings Kite")
+
+      get "/api/v1/items/find_all?name=Fake Turtle Eggs"
+
+      expect(response).to be_successful
+    end
+  end
 end
