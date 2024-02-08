@@ -53,17 +53,42 @@ describe "merchants API", type: :request do
   end
 
   it 'finds a merchant' do
-    merchant = create(:merchant)
+    merchant = Merchant.create!(name: 'Bert')
+    # create(:merchant, name: 'Bert')
 
-    get "/api/v1/merchants/find?name=Mart"
+    get "/api/v1/merchants/find?name=Bert"
 
     expect(response).to be_successful
     merchant_by_name = JSON.parse(response.body, symbolize_names: true)
 
-    expect(merchant_by_name).to have_key(:id)
-    expect(merchant_by_name[:id]).to be_an(String)
+    expect(merchant_by_name[:data]).to have_key(:id)
+    expect(merchant_by_name[:data][:id]).to be_an(String)
 
-    expect(merchant_by_name[:attributes]).to have_key(:name)
-    expect(merchant_by_name[:attributes][:name]).to be_a(String)
+    expect(merchant_by_name[:data][:attributes]).to have_key(:name)
+    expect(merchant_by_name[:data][:attributes][:name]).to be_a(String)
+    expect(merchant_by_name[:data][:attributes][:name]).to eq('Bert')
+  end
+
+  it 'throws an error if given a no name' do
+    get "/api/v1/merchants/find?name="
+
+    expect(response).to_not be_successful
+
+    json = JSON.parse(response.body, symbolize_names: true)
+    
+
+    expect(json[:data][:title]).to eq("Parameter 'name' cannot be empty")
+  end
+
+  it 'throws an error if given a wrong name' do
+    get "/api/v1/merchants/find?name=Bob"
+
+    expect(response).to_not be_successful
+    expect(response.status).to eq(404)
+
+    json = JSON.parse(response.body, symbolize_names: true)
+    
+    expect(json[:data][:status]).to eq(404)
+    expect(json[:data][:title]).to eq("Merchant not found")
   end
 end
