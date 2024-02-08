@@ -38,6 +38,13 @@ class Api::V1::ItemsController < ApplicationController
     items_merchant
   end
 
+  def find_all
+    items = Item.where('name ILIKE ?', "%#{params[:name]}%") if params[:name]
+
+    render json: ItemSerializer.new(items)
+
+  end
+
   private
 
   def not_found_response(exception)
