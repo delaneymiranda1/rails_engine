@@ -33,6 +33,18 @@ class Api::V1::ItemsController < ApplicationController
     item.destroy!
   end
 
+  def merchant
+    item = Item.find(params[:id])
+    merchant = item.merchant
+    if merchant
+      render json: MerchantSerializer.new(merchant)
+    else
+      render json: { error: "Merchant not found" }, status: 404
+    end
+  rescue
+    render json: { error: "Item not found" }, status: :not_found
+  end
+
   private
 
   def not_found_response(exception)
