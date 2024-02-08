@@ -16,7 +16,11 @@ Rails.application.routes.draw do
       end
         resources :items, only: [:index]
       end
-      resources :items
+      resources :items do
+        member do
+          get 'merchant', to: 'items#merchant'
+        end
+      end
     end
   end
 end
