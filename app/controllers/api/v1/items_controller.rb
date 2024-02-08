@@ -1,6 +1,4 @@
 class Api::V1::ItemsController < ApplicationController
-  rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
-  rescue_from ActiveRecord::RecordInvalid, with: :validation_error_response
 
   def index
     if params[:merchant_id].present?
@@ -34,27 +32,37 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def merchant
-    item = Item.find(params[:id])
-    merchant = item.merchant
-    if merchant
-      render json: MerchantSerializer.new(merchant)
+    @item = Item.find(params[:id])
+    items_merchant
+  end
+
+  def find_all
+    if (params[:name] && params[:name].length > 0) && (!params[:max_price] && !params[:min_price])
+      @items = Item.where('name ILIKE ?', "%#{params[:name]}%")
+      check_for_items
+    elsif params[:min_price] && (!params[:max_price] && !params[:name])
+      if params[:min_price].to_i > 0
+        @items = Item.where('unit_price >=?', params[:min_price])
+        check_for_items
+      else
+        render json: { errors: 'price cannot be negative' }, status: :bad_request
+      end
+    elsif params[:max_price] && (!params[:min_price] && !params[:name])
+      if params[:max_price].to_i > 0
+        @items = Item.where('unit_price <=?', params[:max_price])
+        check_for_items
+      else
+        render json: { errors: 'price cannot be negative' }, status: :bad_request
+      end
+    elsif params[:min_price] && (params[:max_price] && !params[:name])
+      @items = Item.where('unit_price >=? AND unit_price <=?', params[:min_price], params[:max_price])
+      check_for_items
     else
-      render json: { error: "Merchant not found" }, status: 404
+      find_all_sad_paths
     end
-  rescue
-    render json: { error: "Item not found" }, status: :not_found
   end
 
   private
-
-  def not_found_response(exception)
-    render json: ErrorSerializer.new(ErrorMessage.new(exception.message, 404)).serialize_json, status: :not_found
-  end
-
-  def validation_error_response(exception)
-    render json: ErrorSerializer.new(ErrorMessage.new(exception.message, 400))
-    .serialize_json, status: :bad_request
-  end
 
   def item_params
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
@@ -73,8 +81,29 @@ class Api::V1::ItemsController < ApplicationController
     if merchant
       items = merchant.items
       render json: ItemSerializer.new(items)
-    else
-      render json: { error: 'Merchant not found' }, status: :not_found
+    end
+  end
+
+  def items_merchant
+    merchant = @item.merchant
+    if merchant
+      render json: MerchantSerializer.new(merchant)
+    end
+  end
+
+  def check_for_items
+    if @items
+      render json: ItemSerializer.new(@items)
+    end
+  end
+
+  def find_all_sad_paths
+    if !params[:name].present? && (!params[:min_price].present? && !params[:max_price].present?)
+      render json: { error: 'parameter cannot be empty or missing' }, status: :bad_request
+    elsif params[:name].present? && (params[:min_price].present? && params[:max_price].present?)#must come before next condition
+      render json: { error: 'cannot send name, minimum price and maximum price' }, status: :bad_request
+    elsif params[:name].present? && (params[:min_price].present? || params[:max_price].present?)
+      render json: { error: 'cannot send both name and minimum price or maximum price' }, status: :bad_request
     end
   end
 end
