@@ -276,12 +276,36 @@ describe "items API", type: :request do
       item3 = create(:item, merchant: @merchant, name: "Lord of The Rings Kite")#
       item4 = create(:item, merchant: @merchant, name: "Pickled Herring")#
       item5 = create(:item, merchant: @merchant, name: "Spring Mattress")#
-      item5 = create(:item, merchant: @merchant, name: "Fake Turtle Eggs")
-      item5 = create(:item, merchant: @merchant, name: "Electric Trampoline Sweeper")
+      item6 = create(:item, merchant: @merchant, name: "Fake Turtle Eggs")
+      item7 = create(:item, merchant: @merchant, name: "Electric Trampoline Sweeper")
 
       get "/api/v1/items/find_all?name=Ring"
 
       expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].count).to eq(5)
+
+      items[:data].each do |item|
+        expect(item).to have_key(:id)
+        expect(item[:id]).to be_an(String)
+
+        expect(item).to have_key(:type)
+        expect(item[:id]).to be_an(String)
+
+        expect(item[:attributes]).to have_key(:name)
+        expect(item[:attributes][:name]).to be_a(String)
+
+        expect(item[:attributes]).to have_key(:description)
+        expect(item[:attributes][:description]).to be_a(String)
+
+        expect(item[:attributes]).to have_key(:unit_price)
+        expect(item[:attributes][:unit_price]).to be_a(Float)
+
+        expect(item[:attributes]).to have_key(:merchant_id)
+        expect(item[:attributes][:merchant_id]).to be_a(Integer)
+      end
     end
 
     it "happy: fetches all items with the given min price" do
