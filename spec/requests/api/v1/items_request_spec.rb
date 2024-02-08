@@ -247,10 +247,21 @@ describe "items API", type: :request do
       get "/api/v1/items/#{item.id}/merchant"
 
       expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      data = JSON.parse(response.body, symbolize_names: true)
+
+      expect(data[:data][:id].to_i).to eq(item.merchant.id)
+      expect(data[:data][:type]).to eq("merchant")
+      expect(data[:data][:attributes][:name]).to eq(item.merchant.name)
     end
 
     it "sad: throws 404 error if item not found" do
+      get "/api/v1/items/35634/merchant"
 
+      expect(response).to have_http_status(:not_found)
+      expect(response).not_to be_successful
+      expect(response.status).to eq(404)
     end
   end
 end
