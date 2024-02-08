@@ -13,7 +13,7 @@ Rails.application.routes.draw do
         collection do
           get 'find', to: 'merchants#find'
         end
-      end
+      
         resources :items, only: [:index]
       end
       resources :items do
