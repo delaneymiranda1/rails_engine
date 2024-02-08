@@ -1,6 +1,5 @@
 class Api::V1::MerchantsController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :not_found_response
-  rescue_from ActiveRecord::RecordInvalid, with: :validation_error_response
   def find
     if params[:name].blank?
       render json: { data: { status: 422, title: "Parameter 'name' cannot be empty" } }, status: :unprocessable_entity
@@ -29,10 +28,4 @@ class Api::V1::MerchantsController < ApplicationController
   def not_found_response(exception)
     render json: ErrorSerializer.new(ErrorMessage.new(exception.message, 404)).serialize_json, status: :not_found
   end
-
-  def validation_error_response(exception)
-    render json: ErrorSerializer.new(ErrorMessage.new(exception.message, 400))
-    .serialize_json, status: :bad_request
-  end
-
 end
