@@ -39,28 +39,25 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def find_all
-    if params[:name]
-      items = Item.where('name ILIKE ?', "%#{params[:name]}%")
-      if items.empty?
-        items = []
-      end
-    elsif params[:min_price] && !params[:max_price].present?
-      items = Item.where('unit_price >=?', params[:min_price])
-      if items.empty?
-        items = []
-      end
-    elsif params[:max_price] && !params[:min_price].present?
-      items = Item.where('unit_price <=?', params[:max_price])
-      if items.empty?
-        items = []
-      end
-    elsif params[:min_price] && params[:max_price]
-      items = Item.where('unit_price >=? AND unit_price <=?', params[:min_price], params[:max_price])
-      if items.empty?
-        items = []
-      end
+    if (params[:name] && params[:name].length > 0) && (!params[:max_price] && !params[:min_price])
+      @items = Item.where('name ILIKE ?', "%#{params[:name]}%")
+      check_for_items
+    elsif params[:min_price] && (!params[:max_price] && !params[:name])
+      @items = Item.where('unit_price >=?', params[:min_price])
+      check_for_items
+    elsif params[:max_price] && (!params[:min_price] && !params[:name])
+      @items = Item.where('unit_price <=?', params[:max_price])
+      check_for_items
+    elsif params[:min_price] && (params[:max_price] && !params[:name])
+      @items = Item.where('unit_price >=? AND unit_price <=?', params[:min_price], params[:max_price])
+      check_for_items
+    elsif !params[:name].present? && (!params[:min_price].present? && !params[:max_price].present?)
+      render json: { error: 'parameter cannot be empty or missing' }, status: :bad_request
+    elsif params[:name].present? && (params[:min_price].present? && params[:max_price].present?)#must come before next condition
+      render json: { error: 'cannot send name, minimum price and maximum price' }, status: :bad_request
+    elsif params[:name].present? && (params[:min_price].present? || params[:max_price].present?)
+      render json: { error: 'cannot send both name and minimum price or maximum price' }, status: :bad_request
     end
-    render json: ItemSerializer.new(items)
   end
 
   private
@@ -105,5 +102,14 @@ class Api::V1::ItemsController < ApplicationController
     end
   rescue
     render json: { error: "Item not found" }, status: :not_found
+  end
+
+  def check_for_items
+    if @items
+      render json: ItemSerializer.new(@items)
+    else
+      @items = []
+      render json: ItemSerializer.new(@items)
+    end
   end
 end
