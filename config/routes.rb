@@ -15,7 +15,7 @@ Rails.application.routes.draw do
       end
       resources :items do
         member do
-          get 'merchant', to: 'items#merchant'
+          get "merchant", to: "items#merchant"
         end
       end
     end
