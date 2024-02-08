@@ -282,6 +282,7 @@ describe "items API", type: :request do
       get "/api/v1/items/find_all?name=Ring"
 
       expect(response).to be_successful
+      expect(response.status).to eq(200)
 
       items = JSON.parse(response.body, symbolize_names: true)
 
@@ -316,6 +317,7 @@ describe "items API", type: :request do
       get "/api/v1/items/find_all?min_price=99"
 
       expect(response).to be_successful
+      expect(response.status).to eq(200)
 
       items = JSON.parse(response.body, symbolize_names: true)
 
@@ -330,6 +332,7 @@ describe "items API", type: :request do
       get "/api/v1/items/find_all?max_price=199"
 
       expect(response).to be_successful
+      expect(response.status).to eq(200)
 
       items = JSON.parse(response.body, symbolize_names: true)
 
@@ -344,13 +347,14 @@ describe "items API", type: :request do
       get "/api/v1/items/find_all?max_price=199&min_price=99"
 
       expect(response).to be_successful
+      expect(response.status).to eq(200)
 
       items = JSON.parse(response.body, symbolize_names: true)
 
       expect(items[:data].count).to eq(1)
     end
 
-    it "sad: returns an empty array if no items match query" do
+    it "happy: returns an empty array if no items match query" do
       item1 = create(:item, merchant: @merchant, name: "Ring")
       item2 = create(:item, merchant: @merchant, name: "Turing Coffee Mug")
       item3 = create(:item, merchant: @merchant, name: "Lord of The Rings Kite")
@@ -358,26 +362,72 @@ describe "items API", type: :request do
       get "/api/v1/items/find_all?name=Fake Turtle Eggs"
 
       expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data]).to eq([])
+      expect(items[:data].count).to eq(0)
+    end
+
+    it "happy: returns array even if space is sent in query" do
+      item1 = create(:item, merchant: @merchant, name: "Ring")
+      item2 = create(:item, merchant: @merchant, name: "Turing Coffee Mug")
+      item3 = create(:item, merchant: @merchant, name: "Lord of The Rings Kite")
+
+      get "/api/v1/items/find_all?name=  "
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data]).to eq([])
+      expect(items[:data].count).to eq(0)
+
+      get "/api/v1/items/find_all?name= "
+
+      expect(response).to be_successful
+      expect(response.status).to eq(200)
+
+      items = JSON.parse(response.body, symbolize_names: true)
+
+      expect(items[:data].count).to eq(2)
     end
 
     it "sad: must have parameter" do
       get "/api/v1/items/find_all"
+
+      expect(response).to have_http_status(:bad_request)
+      expect(response.body).to include('search parameter is required')
     end
 
     it "sad: param must not be empty" do
       get "/api/v1/items/find_all?name="
+
+      expect(response).to have_http_status(:bad_request)
+      expect(response.body).to include('parameter must not be empty')
     end
 
     it "sad: cannot send both name and min_price" do
       get "/api/v1/items/find_all?name=Ring&min_price=99"
+
+      expect(response).to have_http_status(:bad_request)
+      expect(response.body).to include('cannot send both name and minimum price')
     end
 
     it "sad: cannot send both name and max_price" do
       get "/api/v1/items/find_all?name=Ring&max_price=300"
+
+      expect(response).to have_http_status(:bad_request)
+      expect(response.body).to include('cannot send both name and maximum price')
     end
 
     it "sad: cannot send both name and min_price and max_price" do
       get "/api/v1/items/find_all?name=Ring&min_price=99&max_price=300"
+
+      expect(response).to have_http_status(:bad_request)
+      expect(response.body).to include('cannot send name, minimum price and maximum price')
     end
   end
 end
