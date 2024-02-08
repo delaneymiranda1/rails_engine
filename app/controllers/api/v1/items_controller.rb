@@ -92,8 +92,6 @@ class Api::V1::ItemsController < ApplicationController
     if merchant
       items = merchant.items
       render json: ItemSerializer.new(items)
-    else
-      render json: { error: 'Merchant not found' }, status: :not_found
     end
   end
 
@@ -101,18 +99,11 @@ class Api::V1::ItemsController < ApplicationController
     merchant = @item.merchant
     if merchant
       render json: MerchantSerializer.new(merchant)
-    else
-      render json: { error: "Merchant not found" }, status: 404
     end
-  rescue
-    render json: { error: "Item not found" }, status: :not_found
   end
 
   def check_for_items
     if @items
-      render json: ItemSerializer.new(@items)
-    else
-      @items = []
       render json: ItemSerializer.new(@items)
     end
   end
