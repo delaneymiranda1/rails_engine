@@ -441,5 +441,19 @@ describe "items API", type: :request do
       expect(response).to have_http_status(:bad_request)
       expect(response.body).to include('cannot send name, minimum price and maximum price')
     end
+
+    it "sad: isn't happy if unit_price is negative" do
+      item = create(:item, merchant: @merchant)
+
+      get "/api/v1/items/find_all?min_price=-100"
+
+      expect(response).to have_http_status(:bad_request)
+      expect(response.body).to include('price cannot be negative')
+
+      get "/api/v1/items/find_all?max_price=-100"
+
+      expect(response).to have_http_status(:bad_request)
+      expect(response.body).to include('price cannot be negative')
+    end
   end
 end
