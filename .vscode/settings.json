@@ -1,0 +1,32 @@
+{
+  "favorites.resources": [
+    {
+      "filePath": "app/controllers/application_controller.rb",
+      "group": "Default"
+    },
+    {
+      "filePath": "app/serializers",
+      "group": "Default"
+    },
+    {
+      "filePath": "app/poros",
+      "group": "Default"
+    },
+    {
+      "filePath": "config/routes.rb",
+      "group": "Default"
+    },
+    {
+      "filePath": "spec/factories",
+      "group": "Default"
+    },
+    {
+      "filePath": "spec/requests/api/v1",
+      "group": "Default"
+    },
+    {
+      "filePath": "app/controllers/api/v1",
+      "group": "Default"
+    }
+  ]
+}
